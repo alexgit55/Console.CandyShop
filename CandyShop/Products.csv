@@ -1,0 +1,12 @@
+Id,Type,Name,Price,CocoaPercentage,Shape
+1,0,Dark Delight,2.99,70
+2,0,Milk Magic,2.49,50
+3,0,White Wonder,2.79,30
+4,0,Hazelnut Heaven,3.19,65
+5,0,Orange Infusion,3.29,55
+6,1,Cherry Twist,1.99,,Round
+7,1,Lemon Swirl,1.89,,Twisted
+8,1,Grape Galaxy,1.99,,Star
+9,1,Strawberry Burst,1.95,,Heart
+10,1,Blueberry Bliss,2.09,,Oval
+11,1,new bar,1.2,,round
