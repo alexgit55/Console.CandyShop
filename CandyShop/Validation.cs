@@ -44,7 +44,7 @@ public static class Validation
             response.Message = "Cocoa percentage must be a number";
             return response;
         }
-        if (percentage < 0 || percentage > 100)
+        if (percentage < 0 || percentage > 99)
         {
             response.IsValid = false;
             response.Message = "Cocoa percentage must be between 0 and 100";
