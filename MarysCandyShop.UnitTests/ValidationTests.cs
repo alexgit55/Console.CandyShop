@@ -5,7 +5,8 @@ namespace MarysCandyShop.UnitTests
         [Fact]
         public void WhenStringIsValidReturnTrue()
         {
-
+            var stringInput = "Test Chocolate Bar";
+            var result = Validation.IsStringValid(stringInput);
         }
     }
 }
