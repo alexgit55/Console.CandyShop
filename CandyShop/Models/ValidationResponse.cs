@@ -1,17 +1,17 @@
 ﻿namespace MarysCandyShop.Models;
 
-internal class ValidationResponse
+public class ValidationResponse
 {
-    internal bool IsValid { get; set; }
-    internal string Message { get; set; }
+    public bool IsValid { get; set; }
+    public string Message { get; set; }
 }
 
-internal class CocoaValidationResponse : ValidationResponse
+public class CocoaValidationResponse : ValidationResponse
 {
-    internal int CocoaPercentage { get; set; }
+    public int CocoaPercentage { get; set; }
 }
 
-internal class PriceValidationResponse : ValidationResponse
+public class PriceValidationResponse : ValidationResponse
 {
-    internal decimal Price { get; set; }
+    public decimal Price { get; set; }
 }

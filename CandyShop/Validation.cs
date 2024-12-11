@@ -3,9 +3,9 @@ using MarysCandyShop.Models;
 
 namespace MarysCandyShop;
 
-internal static class Validation
+public static class Validation
 {
-    internal static PriceValidationResponse IsPriceValid(string? productPrice)
+    public static PriceValidationResponse IsPriceValid(string? productPrice)
     {
         var response = new PriceValidationResponse
         {
@@ -31,7 +31,7 @@ internal static class Validation
         return response;
     }
 
-    internal static CocoaValidationResponse IsCocoaPercentageValid(string? cocoaPercentage)
+    public static CocoaValidationResponse IsCocoaPercentageValid(string? cocoaPercentage)
     {
         var response = new CocoaValidationResponse
         {
@@ -44,7 +44,7 @@ internal static class Validation
             response.Message = "Cocoa percentage must be a number";
             return response;
         }
-        if (percentage < 0 || percentage > 100)
+        if (percentage < 0 || percentage > 99)
         {
             response.IsValid = false;
             response.Message = "Cocoa percentage must be between 0 and 100";
@@ -54,7 +54,7 @@ internal static class Validation
         return response;
     }
 
-    internal static bool IsStringValid(string input)
+    public static bool IsStringValid(string input)
     {
         return !string.IsNullOrWhiteSpace(input) && input.Length <= 20;
     }
