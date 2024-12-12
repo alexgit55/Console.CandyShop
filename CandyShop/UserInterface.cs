@@ -82,27 +82,31 @@ namespace MarysCandyShop
 
             productToUpdate.Price = AnsiConsole.Confirm("Update price?") ? AnsiConsole.Ask<decimal>("Product's new price: ") : productToUpdate.Price;
 
+            var type = productToUpdate.Type;
             var updateType = AnsiConsole.Confirm("Update type?");
+            
 
             if (updateType)
             {
-                var type = AnsiConsole.Prompt(
+                type = AnsiConsole.Prompt(
                     new SelectionPrompt<Enums.ProductType>()
                     .Title("What type of product is this?")
                     .AddChoices(Enums.ProductType.ChocolateBar, Enums.ProductType.Lollipop)
                 );
-                if (type == Enums.ProductType.ChocolateBar)
+            }
+            if (type == Enums.ProductType.ChocolateBar)
+            {
+                Console.WriteLine("Cocoa percentage: ");
+                var cocoaPercentage = int.Parse(Console.ReadLine());
+                return new ChocolateBar(productToUpdate.Id)
                 {
-                    Console.WriteLine("Cocoa percentage: ");
-                    var cocoaPercentage = int.Parse(Console.ReadLine());
-                    return new ChocolateBar(productToUpdate.Id)
-                    {
-                        Name = productToUpdate.Name,
-                        Price = productToUpdate.Price,
-                        CocoaPercentage = cocoaPercentage
-                    };
-                }
-                
+                    Name = productToUpdate.Name,
+                    Price = productToUpdate.Price,
+                    CocoaPercentage = cocoaPercentage
+                };
+            }
+            else
+            {
                 Console.WriteLine("Shape: ");
                 var shape = Console.ReadLine();
                 return new Lollipop(productToUpdate.Id)
@@ -112,8 +116,6 @@ namespace MarysCandyShop
                     Shape = shape
                 };
             }
-
-            return productToUpdate;
         }
 
         private static void ViewProduct(Product productChoice)
@@ -124,9 +126,6 @@ namespace MarysCandyShop
 
             AnsiConsole.Write(panel);
 
-            //Console.WriteLine("Press any key to return to the Menu");
-            //Console.ReadKey();
-            //Console.Clear();
         }
 
         private static Product GetProductChoice()
@@ -143,15 +142,23 @@ namespace MarysCandyShop
             return products.Single(x => x.Name == productChoice);
         }
 
+        [Obsolete]
         internal static void ViewProducts(List<Product> products)
         {
-            Console.WriteLine("Id,Type,Name,Price,CocoaPercentage,Shape");
-            Console.WriteLine(divider);
+            var table = new Table();
+            table.AddColumn("Id");
+            table.AddColumn("Name");
+            table.AddColumn("Type");
+            table.AddColumn("Price");
+            table.AddColumn("CocoaPercentage");
+            table.AddColumn("Shape");
+
             foreach (var product in products)
             {
-                
-                Console.WriteLine(product.GetProductForCSV(product.Id));
+                table.AddRow(product.GetColumnsArray());
             }
+
+            AnsiConsole.Write(table);
         }
 
         internal static void PrintHeader()

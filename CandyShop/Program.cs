@@ -6,7 +6,6 @@ namespace MarysCandyShop
     {
         static void Main(string[] args)
         {
-            DataSeed.SeedData();
 
             var productsController = new ProductsController();
             productsController.CreateDatabase();
