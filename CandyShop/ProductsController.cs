@@ -1,43 +1,80 @@
 ﻿using MarysCandyShop.Models;
+using Microsoft.Data.Sqlite;
 using static MarysCandyShop.Enums;
 
 namespace MarysCandyShop
 {
     internal class ProductsController
     {
+        private string ConnectionString { get; } = "Data Source=products.db";
+
+        internal void CreateDatabase()
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(ConnectionString))
+                {
+                    connection.Open();
+                    using var command = connection.CreateCommand();
+                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Products (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT NOT NULL,
+                    Price DECIMAL NOT NULL,
+                    CocoaPercentage INTEGER NULL,
+                    Shape TEXT NULL,
+                    Type INTEGER NOT NULL
+                )";
+                    command.ExecuteNonQuery();
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+        }
         internal List<Product> GetProducts()
         {
             var products = new List<Product>();
 
             try
             {
-                using (StreamReader reader = new StreamReader(Configuration.DocPath))
+                using var connection = new SqliteConnection(ConnectionString);
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM Products";
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.HasRows)
                 {
-                    reader.ReadLine(); // Skip headers
-                    string line = reader.ReadLine();
-                    while (line != null)
+                    while (reader.Read())
                     {
-                        string[] parts = line.Split(',');
-
-                        if (int.Parse(parts[1]) == (int)ProductType.ChocolateBar)
+                        var id = reader.GetInt32(0);
+                        var type = (ProductType)reader.GetInt32(5);
+                        var name = reader.GetString(1);
+                        var price = reader.GetDecimal(2);
+                        switch (type)
                         {
-                            var product = new ChocolateBar(int.Parse(parts[0]));
-                            product.Name = parts[2];
-                            product.Price = decimal.Parse(parts[3]);
-                            product.CocoaPercentage = int.Parse(parts[4]);
-                            products.Add(product);
+                            case ProductType.ChocolateBar:
+                                var cocoaPercentage = reader.GetInt32(3);
+                                products.Add(new ChocolateBar(id)
+                                {
+                                    Name = name,
+                                    Price = price,
+                                    CocoaPercentage = cocoaPercentage
+                                });
+                                break;
+                            case ProductType.Lollipop:
+                                var shape = reader.GetString(4);
+                                products.Add(new Lollipop(id)
+                                {
+                                    Name = name,
+                                    Price = price,
+                                    Shape = shape
+                                });
+                                break;
                         }
-                        else if (int.Parse(parts[1]) == (int)ProductType.Lollipop)
-                        {
-                            var product = new Lollipop(int.Parse(parts[0]));
-                            product.Name = parts[2];
-                            product.Price = decimal.Parse(parts[3]);
-                            product.Shape = parts[5];
-                            products.Add(product);
-                        }
-
-
-                        line = reader.ReadLine();
                     }
                 }
             }
@@ -54,23 +91,15 @@ namespace MarysCandyShop
         internal void AddProduct(Product product)
         {
 
-            var id = GetProducts().Count+1;
-
             try
             {
-                using (StreamWriter writer = new StreamWriter(Configuration.DocPath, true))
-                {
-                    // Check if file is empty and add headers first
-                    if (writer.BaseStream.Length <= 3)
-                    {
-                        writer.WriteLine("Id,Type,Name,Price,CocoaPercentage,Shape");
-                    }
-                    
-                    var csvLine = product.GetProductForCSV(id);
-                    writer.WriteLine(csvLine);
-                
-                }
-                Console.WriteLine("Product saved to file");
+                using var connection = new SqliteConnection(ConnectionString);
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = product.GetInsertQuery();
+                product.AddParameters(command);
+                command.ExecuteNonQuery();
+
             }
             catch (Exception e)
             {   
@@ -79,42 +108,41 @@ namespace MarysCandyShop
             }
         }
 
-        internal void AddProducts(List<Product> products)
+        internal void DeleteProduct(Product product)
         {
-
             try
             {
-                using (StreamWriter writer = new StreamWriter(Configuration.DocPath))
-                {
-                    writer.WriteLine("Id,Type,Name,Price,CocoaPercentage,Shape");
-                    foreach (var product in products)
-                    {
-                        var csvLine = product.GetProductForCSV(product.Id);
-                        writer.WriteLine(csvLine);
-                    }
-                }
-                Console.WriteLine("Products saved to file");
+                using var connection = new SqliteConnection(ConnectionString);
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = $"DELETE FROM Products WHERE Id = {product.Id}";
+                command.ExecuteNonQuery();
+                Console.WriteLine($"{product.Name} has been removed.");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"There was an error saving products: {e.Message}");
+                Console.WriteLine($"There was an error deleting product: {e.Message}");
                 Console.WriteLine(UserInterface.divider);
             }
-        }
-        internal void DeleteProduct(Product product)
-        {
-            var products = GetProducts();
-            var updatedProducts = products.Where(x => x.Id != product.Id).ToList();
-            AddProducts(updatedProducts);
         }
 
         internal void UpdateProduct(Product product)
         {
-            var products = GetProducts();
-            var updatedProducts = products.Where(x => x.Id != product.Id).ToList();
-            updatedProducts.Add(product);
-
-            AddProducts(updatedProducts);
+            try
+            {
+                using var connection = new SqliteConnection(ConnectionString);
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = product.GetUpdateQuery();
+                product.AddParameters(command);
+                command.ExecuteNonQuery();
+                Console.WriteLine("Product has been updated");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"There was an error updating product: {e.Message}");
+                Console.WriteLine(UserInterface.divider);
+            }
         }
     }
 }
