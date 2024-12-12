@@ -86,19 +86,13 @@ namespace MarysCandyShop
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(Configuration.DocPath, true))
-                {
-                    // Check if file is empty and add headers first
-                    if (writer.BaseStream.Length <= 3)
-                    {
-                        writer.WriteLine("Id,Type,Name,Price,CocoaPercentage,Shape");
-                    }
-                    
-                    var csvLine = product.GetProductForCSV(id);
-                    writer.WriteLine(csvLine);
-                
-                }
-                Console.WriteLine("Product saved to file");
+                using var connection = new SqliteConnection(ConnectionString);
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = product.GetInsertQuery();
+                product.AddParameters(command);
+                command.ExecuteNonQuery();
+
             }
             catch (Exception e)
             {   

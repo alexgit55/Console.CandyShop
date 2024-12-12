@@ -1,4 +1,5 @@
-﻿using static MarysCandyShop.Enums;
+﻿using Microsoft.Data.Sqlite;
+using static MarysCandyShop.Enums;
 
 namespace MarysCandyShop.Models
 {
@@ -26,6 +27,12 @@ namespace MarysCandyShop.Models
 
         // This method will be for formatting the product for the ANSI Console panel for the View Product option
         internal abstract string GetProductForPanel();
+
+        internal abstract string GetInsertQuery();
+
+        internal abstract void AddParameters(SqliteCommand command);
+
+
     }
 
     internal class ChocolateBar : Product
@@ -50,6 +57,19 @@ namespace MarysCandyShop.Models
         {
             return $"Id: {Id}\nType: {Type}\nName: {Name}\nPrice: {Price}\nCocoa Percentage: {CocoaPercentage}";
         }
+
+        internal override string GetInsertQuery()
+        {
+            return $@"INSERT INTO Products (name, price, type, cocoaPercentage) VALUES (@Name, @Price, @Type, @CocoaPercentage)";
+        }
+
+        internal override void AddParameters(SqliteCommand command)
+        {
+            command.Parameters.AddWithValue("@Name", Name);
+            command.Parameters.AddWithValue("@Price", Price);
+            command.Parameters.AddWithValue("@Type", (int)Type);
+            command.Parameters.AddWithValue("@CocoaPercentage", CocoaPercentage);
+        }
     }
 
     internal class Lollipop : Product
@@ -73,6 +93,19 @@ namespace MarysCandyShop.Models
         internal override string GetProductForPanel()
         {
             return $"Id: {Id}\nType: {Type}\nName: {Name}\nPrice: {Price}\nShape: {Shape}";
+        }
+
+        internal override string GetInsertQuery()
+        {
+            return $@"INSERT INTO Products (name, price, type, shape) VALUES (@Name, @Price, @Type, @Shape)";
+        }
+
+        internal override void AddParameters(SqliteCommand command)
+        {
+            command.Parameters.AddWithValue("@Name", Name);
+            command.Parameters.AddWithValue("@Price", Price);
+            command.Parameters.AddWithValue("@Type", (int)Type);
+            command.Parameters.AddWithValue("@Shape", Shape);
         }
     }
 
