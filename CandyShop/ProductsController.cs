@@ -1,10 +1,38 @@
 ﻿using MarysCandyShop.Models;
+using Microsoft.Data.Sqlite;
 using static MarysCandyShop.Enums;
 
 namespace MarysCandyShop
 {
     internal class ProductsController
     {
+        private string ConnectionString { get; } = "Data Source=products.db";
+
+        internal void CreateDatabase()
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(ConnectionString))
+                {
+                    connection.Open();
+                    using var command = connection.CreateCommand();
+                    command.CommandText = @"CREATE TABLE IF NOT EXISTS Products (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT NOT NULL,
+                    Price DECIMAL NOT NULL,
+                    CocoaPercentage INTEGER NULL,
+                    Shape TEXT NULL,
+                    Type INTEGER NOT NULL
+                )";
+                    command.ExecuteNonQuery();
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+        }
         internal List<Product> GetProducts()
         {
             var products = new List<Product>();
